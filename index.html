@@ -173,7 +173,6 @@
     <h1>Account Suspended</h1>
     <p id="banReason"></p>
     <p id="banDuration"></p>
-    <p id="banCooldown"></p>
     <p class="support-email">For support, contact us at:             
        <a href="suport.trendy.movies@gmail.com" style="color: rgb(14, 238, 25);">suport.trendy.movies@gmail.com</a></p>
   </div>
@@ -225,8 +224,7 @@
           // Show ban details in popup
           document.getElementById('banReason').textContent = `Reason: ${banReason}`;
           document.getElementById('banDuration').textContent = `Ban Duration: ${banDuration} days`;
-          document.getElementById('banCooldown').textContent = `Cooldown: ${cooldown} day(s) remaining`;
-
+          
           loadingDiv.style.display = 'none';
           suspendPopup.style.display = 'flex';
         } else {
