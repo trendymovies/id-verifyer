@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Status Check</title>
+  <style>
+    body {
+      background-color: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      overflow: hidden;
+      margin: 0;
+      flex-direction: column;
+    }
+    .logo {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .logo img {
+      max-width: 150px;
+      height: auto;
+    }
+    .logo h1 {
+      margin: 10px 0 0;
+      font-size: 24px;
+      color: white;
+    }
+      body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+    margin: 0;
+    flex-direction: column;
+  }
+  .logo {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .logo img {
+    max-width: 150px;
+    height: auto;
+  }
+  .logo h1 {
+    margin: 10px 0 0;
+    font-size: 24px;
+    color: white;
+  }
+  .loading {
+    text-align: center;
+  }
+
+  /* Custom Loader */
+  .custom-loader {
+    width: 240px;
+    height: 44px;
+    border-radius: 80px;
+    color: #E4E4ED;
+    border: 4px solid;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .custom-loader::before {
+    content: "";
+    position: absolute;
+    margin: 4px;
+    width: 28px;
+    top: 0;
+    bottom: 0;
+    left: -40px;
+    border-radius: inherit;
+    background: #4E73DF;
+    box-shadow: -20px 0 24px 6px #4E73DF;
+    clip-path: polygon(0 5%, 100% 0, 100% 100%, 0 95%, -60px 50%);
+    animation: ct4 1s infinite linear;
+  }
+
+  @keyframes ct4 {
+    100% {
+      left: calc(100% + 40px)
+    }
+  }
+
+ .suspend-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 500px;
+    padding: 30px;
+    background-color: white;
+    color: black;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 9999;
+    animation: fadeIn 1s ease-in-out;
+  }
+
+  .suspend-popup h1 {
+    color: #FF4C4C; /* Red for alert */
+    margin-bottom: 20px;
+    font-size: 28px;
+    animation: slideIn 1.5s ease-out;
+  }
+
+  .suspend-popup p {
+    margin: 10px 0;
+    font-size: 18px;
+    color: #333; /* Dark gray for general text */
+    animation: fadeInText 2s ease-out;
+  }
+
+  /* Animation Effects */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeInText {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  </style>
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body>
+  <div class="logo">
+    <img src="https://ci3.googleusercontent.com/meips/ADKq_NaLGANn8gkBQapr8abrsDPTJd1N_SiQauZU-MjDt6a3QOY9kKoBJlcydgioP6e5LX90P1vBPNHy_hacTd9HeWIhxvuYsvDxSw=s0-d-e1-ft#https://share1.cloudhq-mkt3.net/7b6ebf980c6e5a.png" alt="Company Logo">
+    <h1>Trendy Movies</h1>
+  </div>
+
+ <div class="loading" id="loading">
+  <div class="custom-loader"></div>
+  
+</div>
+
+  <div class="suspend-popup" id="suspendPopup" style="display: none;">
+    <h1>Account Suspended</h1>
+    <p id="banReason"></p>
+    <p id="banDuration"></p>
+    <p id="banCooldown"></p>
+    <p class="support-email">For support, contact us at:             
+       <a href="suport.trendy.movies@gmail.com" style="color: rgb(14, 238, 25);">suport.trendy.movies@gmail.com</a></p>
+  </div>
+
+  <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCBPGSYNVaPPDu7RWee9ymckMaI1VQNjd4",
+      authDomain: "trendy-movie.firebaseapp.com",
+      databaseURL: "https://trendy-movie-default-rtdb.firebaseio.com",
+      projectId: "trendy-movie",
+      storageBucket: "trendy-movie.appspot.com",
+      messagingSenderId: "699469684359",
+      appId: "1:699469684359:web:34cc2adfc8019b89a76222",
+      measurementId: "G-54SX69JVY3"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+
+    // Retrieve data from localStorage
+    const uid = localStorage.getItem('uid');
+    const email = localStorage.getItem('email');
+
+    const loadingDiv = document.getElementById('loading');
+    const suspendPopup = document.getElementById('suspendPopup');
+
+    function redirectToURL() {
+      window.location.href = 'https://grabify.link/17CFFS';
+    }
+
+    if (!uid || !email) {
+      // Redirect if localStorage data is missing
+      setTimeout(redirectToURL, 4000);
+    } else {
+      // Check user status in Firebase Realtime Database
+      const dbRef = firebase.database().ref(`bans/${uid}`);
+
+      dbRef.once('value').then(snapshot => {
+        const banData = snapshot.val();
+
+        if (banData) {
+          const banReason = banData.reason || 'No reason provided';
+          const banDuration = banData.duration || 0;
+          const startDate = new Date(banData.startDate);
+          const endDate = new Date(startDate.getTime() + banDuration * 24 * 60 * 60 * 1000);
+          const cooldown = Math.max(0, Math.ceil((endDate - new Date()) / (1000 * 60 * 60 * 24)));
+
+          // Show ban details in popup
+          document.getElementById('banReason').textContent = `Reason: ${banReason}`;
+          document.getElementById('banDuration').textContent = `Ban Duration: ${banDuration} days`;
+          document.getElementById('banCooldown').textContent = `Cooldown: ${cooldown} day(s) remaining`;
+
+          loadingDiv.style.display = 'none';
+          suspendPopup.style.display = 'flex';
+        } else {
+          // Redirect if user is not found in bans
+          setTimeout(redirectToURL, 4000);
+        }
+      }).catch(error => {
+        console.error('Error fetching user data:', error);
+        setTimeout(redirectToURL, 4000);
+      });
+    }
+  </script>
+</body>
+</html>
